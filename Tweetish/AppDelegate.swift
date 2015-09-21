@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import OAuthSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,16 +16,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var storyboard = UIStoryboard(name: "Main", bundle: nil)
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
-        
+        // Override point for customization after application launch.        
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "userDidLogout", name: userDidLogoutNotification, object: nil)
         
-        if User.currentUser != nil {
-            // Go to logged-in screen
-            print("Current user detected \(User.currentUser?.name)")
-            let vc = storyboard.instantiateViewControllerWithIdentifier("TimelineNavigationController") 
-            window?.rootViewController = vc
-        }
+//        if User.currentUser != nil {
+//            // Go to logged-in screen
+//            print("Current user detected \(User.currentUser?.name)")
+//            let vc = storyboard.instantiateViewControllerWithIdentifier("TimelineNavigationController") 
+//            window?.rootViewController = vc
+//        }
+        
         return true
     }
     
@@ -57,9 +58,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        TwitterClient.sharedInstance.openURL(url)
+        if (url.host == "oauth-callback") {
+            OAuth1Swift.handleOpenURL(url)
+        }
         return true
     }
-
 }
 

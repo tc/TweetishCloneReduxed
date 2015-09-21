@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AFNetworking
 
 class TweetCell: UITableViewCell {
 
@@ -25,7 +26,9 @@ class TweetCell: UITableViewCell {
             tweetContentLabel.text = tweet.text
             userHandleLabel.text = "@\(tweet.user!.screenName!)"
             userTitleLabel.text = tweet.user?.name
-            userAvatarImage.setImageWithURL(NSURL(string: tweet.user!.profileImageUrl!))
+            
+            userAvatarImage.setImageWithURL(NSURL(string:tweet.avatarImageUrl!)!)
+            
             retweetedLabel.hidden = true
             timestampLabel.text = tweet.getCompactDate()
             if (tweet.favorited!) {

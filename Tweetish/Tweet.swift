@@ -7,9 +7,13 @@
 //
 
 import UIKit
+import SwiftyJSON
+
 class Tweet: NSObject {
     
     var user: User?
+    
+    var avatarImageUrl:String?
     var text: String?
     var createdAtString: String?
     var createdAt: NSDate?
@@ -20,36 +24,27 @@ class Tweet: NSObject {
     var retweeted: Bool?
     var id: Int?
     
-    var dictionary: NSDictionary
+    var json: JSON
     
-    init(dictionary: NSDictionary) {
-        self.dictionary = dictionary
-        user = User(dictionary: dictionary["user"] as! NSDictionary)
-        text = dictionary["text"] as? String
-        createdAtString = dictionary["created_at"] as? String
-        id = dictionary["id"] as? Int
-        favoriteCount = dictionary["favorite_count"] as? Int
-        retweetCount = dictionary["retweet_count"] as? Int
-        favorited = dictionary["favorited"] as? Bool
-        retweeted = dictionary["retweeted"] as? Bool
+    init(json: JSON) {
+        self.json = json
+        user = User(json: json["user"])
+        text = json["text"].string!
+        createdAtString = json["created_at"].string!
+        id = json["id"].intValue
+        favoriteCount = json["favorite_count"].intValue
+        retweetCount = json["retweet_count"].intValue
+        favorited = json["favorited"].boolValue
+        retweeted = json["retweeted"].boolValue
+        avatarImageUrl = json["user"]["profile_image_url_https"].string!
         
         let formatter = NSDateFormatter()
         formatter.dateFormat = "EEE MMM d HH:mm:ss Z y"
         createdAt = formatter.dateFromString(createdAtString!)
     }
     
-    class func tweetsWithArray(array: [NSDictionary]) -> [Tweet] {
-        var tweets = [Tweet]()
-        
-        for dictionary in array {
-            tweets.append(Tweet(dictionary: dictionary))
-        }
-        
-        return tweets
-    }
-    
     func getCompactDate() -> String {
-        if createdAt == nil {
+        if self.createdAt == nil {
             return ""
         }
         let units: NSCalendarUnit = [NSCalendarUnit.Minute, NSCalendarUnit.Hour, NSCalendarUnit.Day, NSCalendarUnit.Month]

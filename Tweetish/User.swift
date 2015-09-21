@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Bill Eager. All rights reserved.
 //
 
-import UIKit
+import SwiftyJSON
 
 var _currentUser: User?
 let currentUserKey = "kCurrentUserKey"
@@ -18,43 +18,19 @@ class User: NSObject {
     var screenName: String?
     var profileImageUrl: String?
     var tagline: String?
-    var dictionary: NSDictionary?
+    var json: JSON?
     
-    init(dictionary: NSDictionary) {
-        self.dictionary = dictionary
-        name = dictionary["name"] as? String
-        screenName = dictionary["screen_name"] as? String
-        profileImageUrl = dictionary["profile_image_url"] as? String
-        tagline = dictionary["description"] as? String
+    init(json: JSON) {
+        self.json = json
+        name = json["name"].string!
+        screenName = json["screen_name"].string!
+        profileImageUrl = json["profile_image_url"].string!
+        tagline = json["description"].string!
     }
     
     func logout() {
-        User.currentUser = nil
-        TwitterClient.sharedInstance.requestSerializer.removeAccessToken()
+        //User.currentUser = nil
         NSNotificationCenter.defaultCenter().postNotificationName(userDidLogoutNotification, object: nil)
     }
     
-    class var currentUser: User? {
-        get {
-            if _currentUser == nil {
-                let data = NSUserDefaults.standardUserDefaults().objectForKey(currentUserKey) as? NSData
-                if data != nil {
-                    let dictionary = (try! NSJSONSerialization.JSONObjectWithData(data!, options: [])) as! NSDictionary
-                    _currentUser = User(dictionary: dictionary)
-                }
-            }
-            return _currentUser
-        }
-        set (user) {
-            _currentUser = user
-            
-            if _currentUser != nil {
-                let data = try? NSJSONSerialization.dataWithJSONObject(user!.dictionary!, options: [])
-                NSUserDefaults.standardUserDefaults().setObject(data, forKey: currentUserKey)
-            } else {
-                NSUserDefaults.standardUserDefaults().setObject(nil, forKey: currentUserKey)
-            }
-            NSUserDefaults.standardUserDefaults().synchronize()
-        }
-    }
 }

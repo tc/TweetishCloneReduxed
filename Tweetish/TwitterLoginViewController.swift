@@ -11,20 +11,25 @@ import UIKit
 class TwitterLoginViewController: UIViewController {
 
     @IBAction func onLogin(sender: AnyObject) {
-        TwitterClient.sharedInstance.loginWithCompletion() {
-            (user: User?, error: NSError?) in
-            if user != nil {
-                // perform segue
-                self.performSegueWithIdentifier("loginSegue", sender: self)
+        TwitterClient.sharedInstance.loginWithCompletion { (error) -> () in
+            
+            if let error = error {
+                NSLog("Error logging in: \(error.description)")
+                UIAlertView(title: "Login Error", message: "Could not login", delegate: nil, cancelButtonTitle: "ok").show()
+                
             } else {
-                // handle login error
+                self.performSegueWithIdentifier("loginSegue", sender: self)
             }
         }
+        
     }
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        if (TwitterClient.sharedInstance.hasCredentials()) {
+            print("Has creds")
+            self.performSegueWithIdentifier("loginSegue", sender: self)
+        }
     }
 
     override func didReceiveMemoryWarning() {

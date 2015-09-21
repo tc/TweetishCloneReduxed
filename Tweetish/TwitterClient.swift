@@ -1,113 +1,142 @@
 //
 //  TwitterClient.swift
-//  Tweetish
+//  Shittr
 //
-//  Created by Bill Eager on 9/14/15.
-//  Copyright (c) 2015 Bill Eager. All rights reserved.
+//  Created by Patrick Stein on 9/10/15.
+//  Copyright (c) 2015 patrick. All rights reserved.
 //
 
-import UIKit
+import OAuthSwift
+import Locksmith
+import SwiftyJSON
 
-let twitterConsumerKey = "PROVIDE"
-let twitterConsumerSecret = "PROVIDE"
-let twitterBaseURL = NSURL(string: "https://api.twitter.com")
+class TwitterClient: NSObject {
+    static let sharedInstance = TwitterClient()
 
-class TwitterClient: BDBOAuth1RequestOperationManager {
-   
-    var loginCompletion: ((user: User?, error: NSError?) -> ())?
-    var tweetCompletion: ((success: Bool?, error: NSError?) -> ())?
+    private static let consumerKey = "idD00emRQLmntEpTqYveTJNP2"
+    private static let consumerSecret = "6kt9jb6aAEAyayrQJ2fz748Q37mEdjXCkTnndV7QHojQTQOBzX"
+    //private static let consumerKey = "A1PafKo3iOplJQw6Xc5W7HmH7"
+    //private static let consumerSecret = "tB6jHxf4aqhRmoFnjbNzER5BWDy0vPo4w8jZOgornDotNUdUz2"
     
-    class var sharedInstance: TwitterClient {
-        struct Static {
-            static let instance = TwitterClient(
-                baseURL: twitterBaseURL,
-                consumerKey: twitterConsumerKey,
-                consumerSecret: twitterConsumerSecret
-            )
-        }
+    private static let baseUrl = "https://api.twitter.com"
+    
+    private var client: OAuthSwiftClient!
+    
+    var oauthToken: String!
+    var oauthTokenSecret: String!
+    var userInfo: JSON?
+    
+    override init() {
+        super.init()
         
-        return Static.instance
-    }
-
-    func homeTimelineWithCompletion(completion: (tweets: [Tweet]?, error: NSError?) -> ()) {
-        self.GET("1.1/statuses/home_timeline.json", parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
-            let tweets = Tweet.tweetsWithArray(response as! [NSDictionary])
-            print("\(response)")
-            completion(tweets: tweets, error: nil)
-            }, failure: { (operation:AFHTTPRequestOperation!, error:NSError!) -> Void in
-            completion(tweets: nil, error: error)
-        })
-    }
-    
-    func homeTimelineWithParams(params: NSDictionary?, completion: (tweets: [Tweet]?, error: NSError?) -> ()) {
+        let creds = Locksmith.loadDataForUserAccount("twitter")
         
-    }
-    
-    func postTweetWithStatus(status: String, inReplyTo: Tweet?, completion: (success: Bool?, error: NSError?) -> ()) {
-        tweetCompletion = completion
-        var parameters: [String: String] = ["status": status]
+        //print(creds)
         
-        if let inReplyTo = inReplyTo {
-            parameters["in_reply_to_status_id"] = "\(inReplyTo.id!)"
-        }
-        self.POST("1.1/statuses/update.json", parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
-            self.tweetCompletion?(success: true, error: nil)
-            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
-                self.tweetCompletion?(success: false, error: error)
+        if let creds = creds, token = creds["OAuthToken"] as? String, secret = creds["OAuthTokenSecret"] as? String {
+            self.createClient(token, secret: secret)
         }
     }
     
-    func favoriteTweetWithCompletion(tweet: Tweet, completion: (success: Bool?, error: NSError?) -> ()) {
-        tweetCompletion = completion
-        let parameters: [String: String] = ["id": "\(tweet.id!)"]
-        print("\(parameters)")
-        self.POST("1.1/favorites/create.json", parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
-            self.tweetCompletion?(success: true, error: nil)
-            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
-                self.tweetCompletion?(success: false, error: error)
-        }
+    func hasCredentials() -> Bool {
+        return client != nil
     }
     
-    func retweetTweetWithCompletion(tweet: Tweet, completion: (success: Bool?, error: NSError?) -> ()) {
-        tweetCompletion = completion
-        self.POST("1.1/statuses/retweet/\(tweet.id!).json", parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
-            self.tweetCompletion?(success: true, error: nil)
-            }) { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
-                self.tweetCompletion?(success: false, error: error)
-        }
-    }
-    
-    func loginWithCompletion(completion: (user: User?, error: NSError?) -> ()) {
-        loginCompletion = completion
+    func loginWithCompletion(completion: (NSError? -> ())) {
+        let oauth = OAuth1Swift(
+            consumerKey: TwitterClient.consumerKey,
+            consumerSecret: TwitterClient.consumerSecret,
+            requestTokenUrl: TwitterClient.baseUrl + "/oauth/request_token",
+            authorizeUrl: TwitterClient.baseUrl + "/oauth/authorize",
+            accessTokenUrl: TwitterClient.baseUrl + "/oauth/access_token"
+        )
         
-        // Fetch request token and redirect to authz page
-        self.requestSerializer.removeAccessToken()
-        self.fetchRequestTokenWithPath("oauth/request_token", method: "GET", callbackURL: NSURL(string: "tweetish://oauth"), scope: nil
-            , success: { (requestToken: BDBOAuth1Credential!) -> Void in
-                let authURL = NSURL(string: "https://api.twitter.com/oauth/authorize?oauth_token=\(requestToken.token)")
-                UIApplication.sharedApplication().openURL(authURL!)
-            }, failure: { (error: NSError!) -> Void in
-                self.loginCompletion?(user: nil, error: error)
-        })
-    }
-    
-    func openURL(url: NSURL) {
-        fetchAccessTokenWithPath("oauth/access_token", method: "POST", requestToken: BDBOAuth1Credential(queryString: url.query), success: { (accessToken: BDBOAuth1Credential!) -> Void in
-            print("Got access token!")
-            self.requestSerializer.saveAccessToken(accessToken)
-            
-            self.GET("1.1/account/verify_credentials.json", parameters: nil, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
-                print("")
-                    let user = User(dictionary: response as! NSDictionary)
-                    User.currentUser = user
-                    self.loginCompletion?(user: user, error: nil)
-                }, failure: { (operation: AFHTTPRequestOperation!, error: NSError!) -> Void in
-                    self.loginCompletion?(user: nil, error: error)
-            })
-            
-            }) { (error: NSError!) -> Void in
-                self.loginCompletion?(user: nil, error: error)
+        
+        oauth.authorizeWithCallbackURL( NSURL(string: "oauth-swift://oauth-callback/twitter")!, success: {
+            credential, response in
+                        
+            do {
+                try Locksmith.updateData([
+                    "OAuthToken": credential.oauth_token,
+                    "OAuthTokenSecret": credential.oauth_token_secret
+                    ], forUserAccount: "twitter")
+                self.createClient(credential.oauth_token, secret: credential.oauth_token_secret)
+                
+            } catch {
+                let error = NSError(domain: "TwitterClient", code: 1, userInfo: ["msg": "Can't update data"])
+                
+                completion(error)
             }
+            
+            completion(nil)
+            
+            
+            }, failure: {(error:NSError!) -> Void in
+                print(error.localizedDescription)
+                completion(error)
+
+            }
+        )
     }
     
+    func fetchUserInfo() {
+        let params = Dictionary<String, AnyObject>()
+        client.get(TwitterClient.baseUrl + "/1.1/account/verify_credentials.json", parameters: params, success: { (data, response) -> Void in
+            self.userInfo = JSON(data: data)
+            }) { (error) -> Void in
+                NSLog(error.description)
+        }
+    }
+    
+    func fetchTweets(cached: Bool, completion: (tweets:[Tweet], error:NSError?) -> Void) {
+        fetchTweetsFromUrl(cached, url: TwitterClient.baseUrl + "/1.1/statuses/home_timeline.json", completion: completion)
+        
+        //        var params:[String:AnyObject] = [:]
+        //        params["max_id"] = tweet.id
+        //
+        //        fetchTweetsFromUrl(cached, url: "https://api.twitter.com/1.1/statuses/home_timeline.json", params: params, completion: completion)
+    }
+
+    private func fetchTweetsFromUrl(cached: Bool, url: String, params: [String:AnyObject]? = nil, completion: ([Tweet], NSError?) -> Void) {
+        var params = params
+        if params == nil {
+            params = [String:AnyObject]()
+        }
+        
+        client.get(url, parameters: params!, success: { (data, response) -> Void in
+            var tweets: [Tweet] = []
+            let json = JSON(data: data).array!
+            for entry in json {
+                tweets.append(Tweet(json: entry))
+            }
+            completion(tweets, nil)
+            }, failure: { (error) -> Void in
+                if error.code == 401 {
+                    completion([], error) // TODO - Handle by reauthing?
+                } else {
+                    completion([], error)
+                }
+        })
+    }
+    
+    func logout() {
+        do {
+            try Locksmith.deleteDataForUserAccount("twitter")
+        } catch {
+            print(error)
+        }
+        
+        client = nil
+    }
+    
+    private func createClient(token: String, secret: String) {
+        client = OAuthSwiftClient(
+            consumerKey: TwitterClient.consumerKey,
+            consumerSecret: TwitterClient.consumerSecret,
+            accessToken: token,
+            accessTokenSecret: secret
+        )
+        
+        self.fetchUserInfo()
+    }
 }

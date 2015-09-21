@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AFNetworking
 
 @objc protocol TweetViewControllerDelegate {
     optional func tweetViewController(tweetViewController: TweetViewController, didFavoriteTweet success: Bool)
@@ -30,9 +31,8 @@ class TweetViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(tweet?.text)
         
-        profileImage.setImageWithURL(NSURL(string: (tweet?.user?.profileImageUrl)!))
+        profileImage.setImageWithURL(NSURL(string:tweet!.avatarImageUrl!)!)
         userNameLabel.text = tweet?.user?.name
         userHandleLabel.text = "@\((tweet?.user?.screenName)!)"
         tweetLabel.text = tweet?.text
@@ -40,12 +40,6 @@ class TweetViewController: UIViewController {
         retweetCountLabel.text = "\((tweet?.retweetCount)!)"
         favoriteCountLabel.text = "\((tweet?.favoriteCount)!)"
         
-        favImage.userInteractionEnabled = true
-        favImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "onFavImageTap:"))
-        retweetImage.userInteractionEnabled = true
-        retweetImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "onRetweetImageTap:"))
-        replyImage.userInteractionEnabled = true
-        replyImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "onReplyImageTap:"))
         // Do any additional setup after loading the view.
         
         if tweet!.favorited! {
@@ -58,36 +52,11 @@ class TweetViewController: UIViewController {
         }
     }
     
-    func onFavImageTap(sender: UITapGestureRecognizer) {
-        TwitterClient.sharedInstance.favoriteTweetWithCompletion(tweet!, completion: { (success, error) -> () in
-            if success != nil {
-                self.navigationController?.popToRootViewControllerAnimated(true)
-            } else {
-                // handle error
-            }
-        })
-    }
-    
-    func onRetweetImageTap(sender: UITapGestureRecognizer) {
-        TwitterClient.sharedInstance.retweetTweetWithCompletion(tweet!, completion: { (success, error) -> () in
-            if success != nil {
-                self.navigationController?.popToRootViewControllerAnimated(true)
-            } else {
-                // handle error
-            }
-        })
-    }
-    
-    func onReplyImageTap(sender: UITapGestureRecognizer) {
-        performSegueWithIdentifier("replySegue", sender: self)
-    }
-
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-
     
     // MARK: - Navigation
 
@@ -96,11 +65,5 @@ class TweetViewController: UIViewController {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         
-        if (segue.identifier == "replySegue") {
-            let vc = segue.destinationViewController as! ComposeTweetViewController
-            vc.replyTweet = tweet
-        }
     }
-    
-
 }

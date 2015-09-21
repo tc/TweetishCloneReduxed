@@ -8,14 +8,10 @@
 
 import UIKit
 
-class TimelineViewController: ViewController, UITableViewDataSource, UITableViewDelegate, ComposeTweetViewControllerDelegate {
+class TimelineViewController: ViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     var timelineTweets: [Tweet]?
-    
-    @IBAction func onSignOutAction(sender: AnyObject) {
-        User.currentUser?.logout()
-    }
     
     var refreshControl: UIRefreshControl!
     
@@ -41,16 +37,12 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
     }
     
     func loadData() {
-        TwitterClient.sharedInstance.homeTimelineWithCompletion() {
-            (tweets: [Tweet]?, error: NSError?) in
-            if tweets != nil {
-                self.timelineTweets = tweets
-                self.refreshControl.endRefreshing()
-                self.tableView.reloadData()
-            } else {
-                // handle fetch timeline error
-            }
-        }
+        
+        TwitterClient.sharedInstance.fetchTweets(false, completion: {(tweets, error) in
+            self.timelineTweets = tweets
+            self.refreshControl.endRefreshing()
+            self.tableView.reloadData()
+        })
     }
 
     override func didReceiveMemoryWarning() {
@@ -75,16 +67,19 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
     // Cell gets various attributes set automatically based on table (separators) and data source (accessory views, editing controls)
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
-        cell.tweet = timelineTweets![indexPath.row]
-        cell.layoutIfNeeded()
-        return cell
+        tableView.registerNib(UINib(nibName: "TweetCell", bundle: nil), forCellReuseIdentifier: "TweetCell")
+        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as? TweetCell
+
+        if let c = cell {
+            c.tweet = timelineTweets![indexPath.row]
+            c.layoutIfNeeded()
+            return c
+        } else {
+            // should never get here..
+            return UITableViewCell()
+        }
     }
-    
-    func composeTweetViewController(composeTweetViewController: ComposeTweetViewController, didPostTweet success: Bool) {
-        loadData()
-    }
-    
+        
     // Deselect active row on tap
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
@@ -98,10 +93,6 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         switch(segue.identifier!) {
-            case "composeSegue":
-                let composeTweetViewController = segue.destinationViewController as! ComposeTweetViewController
-                composeTweetViewController.delegate = self
-            break
             case "viewTweetSegue":
                 let tweetViewController = segue.destinationViewController as! TweetViewController
                 let cell = sender as! UITableViewCell
