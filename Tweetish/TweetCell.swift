@@ -11,7 +11,6 @@ import AFNetworking
 
 class TweetCell: UITableViewCell {
 
-    @IBOutlet weak var retweetedLabel: UILabel!
     @IBOutlet weak var tweetContentLabel: UILabel!
     @IBOutlet weak var timestampLabel: UILabel!
     @IBOutlet weak var userHandleLabel: UILabel!
@@ -29,7 +28,6 @@ class TweetCell: UITableViewCell {
             
             userAvatarImage.setImageWithURL(NSURL(string:tweet.avatarImageUrl!)!)
             
-            retweetedLabel.hidden = true
             timestampLabel.text = tweet.getCompactDate()
             if (tweet.favorited!) {
                 favoriteImage.image = UIImage(named: "fav-on")
@@ -48,12 +46,16 @@ class TweetCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         
+        self.layoutMargins = UIEdgeInsetsZero
+        self.preservesSuperviewLayoutMargins = false
         tweetContentLabel.preferredMaxLayoutWidth = tweetContentLabel.frame.size.width
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
+        self.layoutMargins = UIEdgeInsetsZero
+        self.preservesSuperviewLayoutMargins = false
         tweetContentLabel.preferredMaxLayoutWidth = tweetContentLabel.frame.size.width
     }
 

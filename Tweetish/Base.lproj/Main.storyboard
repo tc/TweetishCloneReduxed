@@ -18,8 +18,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yee-sX-UnZ">
-                                <rect key="frame" x="216" y="280" width="169" height="39"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yee-sX-UnZ">
+                                <rect key="frame" x="213" y="280" width="174" height="39"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                 <state key="normal" title="Login with Twitter">
                                     <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -89,14 +89,7 @@
                             </mask>
                         </variation>
                     </view>
-                    <navigationItem key="navigationItem" title="Timeline" id="lga-o9-cxX">
-                        <barButtonItem key="leftBarButtonItem" title="Sign Out" id="04y-HC-01L">
-                            <color key="tintColor" red="0.96265002313138559" green="0.94563810470764831" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                            <connections>
-                                <action selector="onSignOutAction:" destination="BYZ-38-t0r" id="ArR-Fs-QWh"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Timeline" id="lga-o9-cxX"/>
                     <connections>
                         <outlet property="tableView" destination="9lt-Zo-apm" id="4cT-2Q-DeW"/>
                     </connections>
