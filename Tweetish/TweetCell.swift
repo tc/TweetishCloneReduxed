@@ -41,16 +41,19 @@ class TweetCell: UITableViewCell {
             } else {
                 retweetImage.image = UIImage(named: "retweet-default")
             }
+            
+            let tapGestureRecognizer = UITapGestureRecognizer(target:self, action:Selector("avatarImageTapped:"))
+            userAvatarImage.addGestureRecognizer(tapGestureRecognizer)
         }
     }
     
-    @IBAction func avatarImageTapped(sender: AnyObject) {
+    func avatarImageTapped(sender: AnyObject) {
         //notification call
         //NSNotificationCenter.defaultCenter().postNotificationName("goToUserScreen", object: nil, userInfo:["userId":tweet.userId])
 
         NSLog("Single Tap on button")
     }
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

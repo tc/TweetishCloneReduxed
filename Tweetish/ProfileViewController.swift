@@ -43,26 +43,7 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
             title = u.screenName
         }
         
-        sizeHeaderToFit()
-
         loadData()
-    }
-    
-    // http://stackoverflow.com/questions/19005446/table-header-view-height-is-wrong-when-using-auto-layout-ib-and-font-sizes
-    // http://stackoverflow.com/questions/20982558/how-do-i-set-the-height-of-tableheaderview-uitableview-with-autolayout?lq=1
-    func sizeHeaderToFit() {
-        if let header = self.tableView.tableHeaderView {
-            header.setNeedsLayout()
-            header.layoutIfNeeded()
-            
-            let height = header.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height + (self.profileHeaderView?.frame.origin.y)!
-            var frame = header.frame
-            
-            frame.size.height = height
-            header.frame = frame
-            
-            self.tableView.tableHeaderView = header
-        }
     }
     
     func loadData() {
