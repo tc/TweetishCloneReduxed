@@ -16,8 +16,8 @@ Time spent: --
 
 ##### Profile page
 
-- [ ] Contains the user header view
-- [ ] Contains a section with the users basic stats: # tweets, # following, # followers
+- [X] Contains the user header view
+- [X] Contains a section with the users basic stats: # tweets, # following, # followers
 
 ##### Home Timeline
 

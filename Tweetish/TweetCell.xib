@@ -11,7 +11,7 @@
             <rect key="frame" x="0.0" y="0.0" width="599" height="88"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Lxg-dJ-ccj">
+                <imageView contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Lxg-dJ-ccj">
                     <rect key="frame" x="0.0" y="2" width="64" height="64"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="64" id="3E4-eb-hq0"/>
@@ -63,6 +63,16 @@
                     <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wuQ-rI-fJ2">
+                    <rect key="frame" x="0.0" y="2" width="64" height="64"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="64" id="Ied-Ua-HbL"/>
+                        <constraint firstAttribute="width" constant="64" id="dDV-Pe-kf6"/>
+                    </constraints>
+                    <connections>
+                        <action selector="avatarImageTapped:" destination="iN0-l3-epB" eventType="touchUpInside" id="Boz-Js-Vvz"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
@@ -70,6 +80,7 @@
                 <constraint firstAttribute="trailing" secondItem="oW1-3d-2cY" secondAttribute="trailing" constant="8" id="2bl-um-zD8"/>
                 <constraint firstItem="Lxg-dJ-ccj" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="5uv-br-P40"/>
                 <constraint firstItem="2oZ-XF-LPI" firstAttribute="leading" secondItem="Lxg-dJ-ccj" secondAttribute="trailing" constant="8" id="870-Yf-hzx"/>
+                <constraint firstItem="wuQ-rI-fJ2" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="CzO-tl-tmC"/>
                 <constraint firstItem="2oZ-XF-LPI" firstAttribute="top" secondItem="Scg-1F-5j6" secondAttribute="bottom" constant="8" id="F1d-Ue-90e"/>
                 <constraint firstItem="1gd-LB-E8Z" firstAttribute="top" secondItem="2oZ-XF-LPI" secondAttribute="bottom" constant="8" id="HE0-2x-RxI"/>
                 <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="2oZ-XF-LPI" secondAttribute="trailing" constant="8" id="HvP-df-wHY"/>
@@ -86,6 +97,7 @@
                 <constraint firstItem="Scg-1F-5j6" firstAttribute="leading" secondItem="Lxg-dJ-ccj" secondAttribute="trailing" constant="8" id="o6e-fI-n8w"/>
                 <constraint firstAttribute="bottom" secondItem="1gd-LB-E8Z" secondAttribute="bottom" id="pMZ-uQ-VFr"/>
                 <constraint firstItem="1gd-LB-E8Z" firstAttribute="leading" secondItem="2yv-Au-wPU" secondAttribute="trailing" constant="64" id="q1T-Bh-eeY"/>
+                <constraint firstItem="wuQ-rI-fJ2" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="2" id="rlv-lF-yhY"/>
                 <constraint firstItem="XwP-tN-SyU" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="5" id="vdJ-bJ-1wt"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
@@ -95,6 +107,7 @@
                 <outlet property="retweetImage" destination="2yv-Au-wPU" id="Tk1-3H-qUd"/>
                 <outlet property="timestampLabel" destination="oW1-3d-2cY" id="gkU-Eh-c6l"/>
                 <outlet property="tweetContentLabel" destination="2oZ-XF-LPI" id="bIV-AL-oay"/>
+                <outlet property="userAvatarButton" destination="wuQ-rI-fJ2" id="t6q-Yf-3Uc"/>
                 <outlet property="userAvatarImage" destination="Lxg-dJ-ccj" id="h4J-NW-VZG"/>
                 <outlet property="userHandleLabel" destination="XwP-tN-SyU" id="1Y7-nF-jSd"/>
                 <outlet property="userTitleLabel" destination="Scg-1F-5j6" id="k3q-Wc-lAw"/>

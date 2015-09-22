@@ -8,14 +8,17 @@
 
 import UIKit
 
-class TimelineViewController: ViewController, UITableViewDataSource, UITableViewDelegate {
+class TimelineViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     var timelineTweets: [Tweet]?
+    var user: User?
     
     var refreshControl: UIRefreshControl!
     
     override func viewDidLoad() {
+        NSLog("TimelineViewController viewDidLoad")
+        
         super.viewDidLoad()
         
         self.navigationController?.navigationBarHidden = false
@@ -37,12 +40,20 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
     }
     
     func loadData() {
-        
-        TwitterClient.sharedInstance.fetchTweets(false, completion: {(tweets, error) in
-            self.timelineTweets = tweets
-            self.refreshControl.endRefreshing()
-            self.tableView.reloadData()
-        })
+        if let u = user {
+            TwitterClient.sharedInstance.fetchTweets(u.screenName!, completion: {(tweets, error) in
+                self.timelineTweets = tweets
+                self.refreshControl.endRefreshing()
+                self.tableView.reloadData()
+            })
+        } else {
+            TwitterClient.sharedInstance.fetchHomeTweets({(tweets, error) in
+                self.timelineTweets = tweets
+                self.refreshControl.endRefreshing()
+                self.tableView.reloadData()
+            })
+            
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -63,8 +74,6 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
             return 0
         }
     }
-    // Row display. Implementers should *always* try to reuse cells by setting each cell's reuseIdentifier and querying for available reusable cells with dequeueReusableCellWithIdentifier:
-    // Cell gets various attributes set automatically based on table (separators) and data source (accessory views, editing controls)
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         tableView.registerNib(UINib(nibName: "TweetCell", bundle: nil), forCellReuseIdentifier: "TweetCell")
@@ -80,18 +89,36 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
         }
     }
         
-    // Deselect active row on tap
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        NSLog("TimelineViewController#didSelectRowAtIndexPath")
+
+        let tweet = timelineTweets![indexPath.row]
+        pushProfileView(tweet)
+        
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 
     // MARK: - Navigation
+    
+    func pushProfileView(tweet:Tweet) {
+        let identifier = "ProfileViewController"
+        let profileViewController = navigationController?.storyboard?.instantiateViewControllerWithIdentifier(identifier) as! ProfileViewController
+        profileViewController.user = tweet.user
+        navigationController?.pushViewController(profileViewController, animated: true)
+    }
 
+    func pushTweetView(tweet:Tweet) {
+        let identifier = "TweetViewController"
+        let tweetViewController = navigationController?.storyboard?.instantiateViewControllerWithIdentifier(identifier) as! TweetViewController
+        tweetViewController.tweet = tweet
+        navigationController?.pushViewController(tweetViewController, animated: true)
+    }
+    
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        NSLog("TimelineViewController#prepareForSegue")
+
         switch(segue.identifier!) {
             case "viewTweetSegue":
                 let tweetViewController = segue.destinationViewController as! TweetViewController
@@ -100,9 +127,17 @@ class TimelineViewController: ViewController, UITableViewDataSource, UITableView
                 let tweet = timelineTweets![indexPath!.row]
                 tweetViewController.tweet = tweet
             break
+            
+            case "viewProfileSegue":
+                let profileViewController = segue.destinationViewController as! ProfileViewController
+                let cell = sender as! UITableViewCell
+                let indexPath = tableView.indexPathForCell(cell)
+                let tweet = timelineTweets![indexPath!.row]
+                profileViewController.user = tweet.user
+            
+            break
         default:
             break
         }
     }
-
 }

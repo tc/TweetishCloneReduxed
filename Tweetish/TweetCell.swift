@@ -20,6 +20,8 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var retweetImage: UIImageView!
     @IBOutlet weak var favoriteImage: UIImageView!
     
+    @IBOutlet weak var userAvatarButton: UIButton!
+    
     var tweet: Tweet! {
         didSet {
             tweetContentLabel.text = tweet.text
@@ -42,6 +44,13 @@ class TweetCell: UITableViewCell {
         }
     }
     
+    @IBAction func avatarImageTapped(sender: AnyObject) {
+        //notification call
+        //NSNotificationCenter.defaultCenter().postNotificationName("goToUserScreen", object: nil, userInfo:["userId":tweet.userId])
+
+        NSLog("Single Tap on button")
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -61,7 +70,6 @@ class TweetCell: UITableViewCell {
 
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
         // Configure the view for the selected state
     }
 

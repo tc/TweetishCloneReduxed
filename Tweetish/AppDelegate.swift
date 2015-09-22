@@ -17,11 +17,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.        
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "userDidLogout", name: userDidLogoutNotification, object: nil)
+        
+//        let hamburgerViewController = window?.rootViewController as! HamburgerContainerViewController
+//        
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        let menuViewController = storyboard.instantiateViewControllerWithIdentifier("MenuViewController") as! MenuViewController
+//        menuViewController.hamburgerViewController = hamburgerViewController
+//        hamburgerViewController.menuViewController = menuViewController
         
 //        if User.currentUser != nil {
 //            // Go to logged-in screen
-//            print("Current user detected \(User.currentUser?.name)")
+//            NSLog("Current user detected \(User.currentUser?.name)")
 //            let vc = storyboard.instantiateViewControllerWithIdentifier("TimelineNavigationController") 
 //            window?.rootViewController = vc
 //        }
@@ -29,12 +35,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    func userDidLogout() {
-        if let vc = storyboard.instantiateInitialViewController() {
-            window?.rootViewController = vc
-        }
-    }
-
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.

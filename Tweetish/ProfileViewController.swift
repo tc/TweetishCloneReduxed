@@ -8,22 +8,30 @@
 
 import UIKit
 
-class ProfileViewController: ViewController, UITableViewDataSource, UITableViewDelegate {
+class ProfileViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var tableView: UITableView!
+    
+    var user:User?
     var timelineTweets: [Tweet]?
     
     var refreshControl: UIRefreshControl!
+    var profileHeaderView: ProfileHeaderView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.navigationController?.navigationBarHidden = false
+
+        profileHeaderView = NSBundle.mainBundle().loadNibNamed("ProfileHeaderView", owner: self, options: nil)[0] as! ProfileHeaderView
+
+        profileHeaderView?.user = user
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.estimatedRowHeight = 220
         tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.tableHeaderView = profileHeaderView
         
         // Add refresh control to the tableView
         refreshControl = UIRefreshControl()
@@ -31,18 +39,39 @@ class ProfileViewController: ViewController, UITableViewDataSource, UITableViewD
         refreshControl.addTarget(self, action: "onRefresh", forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl, atIndex:0)
         
-        title = "Timeline"
+        if let u = user {
+            title = u.screenName
+        }
+        
+        sizeHeaderToFit()
+
         loadData()
-        // Do any additional setup after loading the view.
+    }
+    
+    // http://stackoverflow.com/questions/19005446/table-header-view-height-is-wrong-when-using-auto-layout-ib-and-font-sizes
+    func sizeHeaderToFit() {
+        let header = self.tableView.tableHeaderView
+        
+        header?.setNeedsLayout()
+        header?.layoutIfNeeded()
+        
+        let height = header?.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height
+        var frame = header?.frame
+        
+        frame?.size.height = height!
+        header!.frame = frame!
+        
+        self.tableView.tableHeaderView = header
     }
     
     func loadData() {
-        
-        TwitterClient.sharedInstance.fetchTweets(false, completion: {(tweets, error) in
-            self.timelineTweets = tweets
-            self.refreshControl.endRefreshing()
-            self.tableView.reloadData()
-        })
+        if let u = user {
+            TwitterClient.sharedInstance.fetchTweets(u.screenName!, completion: {(tweets, error) in
+                self.timelineTweets = tweets
+                self.refreshControl.endRefreshing()
+                self.tableView.reloadData()
+            })
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -86,23 +115,5 @@ class ProfileViewController: ViewController, UITableViewDataSource, UITableViewD
     }
     
     // MARK: - Navigation
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        switch(segue.identifier!) {
-        case "viewTweetSegue":
-            let tweetViewController = segue.destinationViewController as! TweetViewController
-            let cell = sender as! UITableViewCell
-            let indexPath = tableView.indexPathForCell(cell)
-            let tweet = timelineTweets![indexPath!.row]
-            tweetViewController.tweet = tweet
-            break
-        default:
-            break
-        }
-    }
     
 }

@@ -14,23 +14,26 @@ let userDidLoginNotification = "userDidLoginNotification"
 let userDidLogoutNotification = "userDidLogoutNotification"
 
 class User: NSObject {
+    static var currentUser:User?
+    
     var name: String?
     var screenName: String?
-    var profileImageUrl: String?
+    var avatarImageUrl: String?
     var tagline: String?
+    var followingCount: Int?
+    var followersCount: Int?
+    
     var json: JSON?
     
     init(json: JSON) {
         self.json = json
         name = json["name"].string!
         screenName = json["screen_name"].string!
-        profileImageUrl = json["profile_image_url"].string!
+
+        followersCount = json["followers_count"].intValue
+        followingCount = json["friends_count"].intValue
+        
+        avatarImageUrl = json["profile_image_url_https"].string!
         tagline = json["description"].string!
     }
-    
-    func logout() {
-        //User.currentUser = nil
-        NSNotificationCenter.defaultCenter().postNotificationName(userDidLogoutNotification, object: nil)
-    }
-    
 }

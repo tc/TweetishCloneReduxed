@@ -24,14 +24,13 @@ class TwitterClient: NSObject {
     
     var oauthToken: String!
     var oauthTokenSecret: String!
-    var userInfo: JSON?
     
     override init() {
         super.init()
         
         let creds = Locksmith.loadDataForUserAccount("twitter")
         
-        //print(creds)
+        //NSLog(creds)
         
         if let creds = creds, token = creds["OAuthToken"] as? String, secret = creds["OAuthTokenSecret"] as? String {
             self.createClient(token, secret: secret)
@@ -51,7 +50,6 @@ class TwitterClient: NSObject {
             accessTokenUrl: TwitterClient.baseUrl + "/oauth/access_token"
         )
         
-        
         oauth.authorizeWithCallbackURL( NSURL(string: "oauth-swift://oauth-callback/twitter")!, success: {
             credential, response in
                         
@@ -64,7 +62,7 @@ class TwitterClient: NSObject {
                 
             } catch {
                 let error = NSError(domain: "TwitterClient", code: 1, userInfo: ["msg": "Can't update data"])
-                
+                NSLog("failed update locksmith")
                 completion(error)
             }
             
@@ -72,7 +70,8 @@ class TwitterClient: NSObject {
             
             
             }, failure: {(error:NSError!) -> Void in
-                print(error.localizedDescription)
+                NSLog("failure in oauth")
+                NSLog(error.localizedDescription)
                 completion(error)
 
             }
@@ -82,14 +81,44 @@ class TwitterClient: NSObject {
     func fetchUserInfo() {
         let params = Dictionary<String, AnyObject>()
         client.get(TwitterClient.baseUrl + "/1.1/account/verify_credentials.json", parameters: params, success: { (data, response) -> Void in
-            self.userInfo = JSON(data: data)
+            let json = JSON(data: data)
+            User.currentUser = User(json: json)
+            
+            NSLog("Finished fetchUserInfo")
+            NSLog((User.currentUser?.screenName)!)
+
+            
             }) { (error) -> Void in
                 NSLog(error.description)
         }
     }
+
+//    func fetchUser(screenName:String, completion: (user:User, error:NSError?) -> Void) {
+//        let params:[String: String] = ["screen_name": screenName]
+//        
+//        client.get(TwitterClient.baseUrl + "/1.1/users/show.json", parameters: params, success: { (data, response) ->Void in
+//
+//            let json = JSON(data: data)
+//            let user = User(json:json)
+//            completion(user: user, error: nil)
+//            
+//            }) { (error) -> Void in
+//                NSLog(error.description)
+//                //completion(user: nil, error: error)
+//        }
+//    }
+
+    func fetchHomeTweets(completion: (tweets:[Tweet], error:NSError?) -> Void) {
+        let params:[String:String] = [:]
+        
+        fetchTweetsFromUrl(false, url: TwitterClient.baseUrl + "/1.1/statuses/home_timeline.json", params: params, completion: completion)
+    }
+
     
-    func fetchTweets(cached: Bool, completion: (tweets:[Tweet], error:NSError?) -> Void) {
-        fetchTweetsFromUrl(cached, url: TwitterClient.baseUrl + "/1.1/statuses/home_timeline.json", completion: completion)
+    func fetchTweets(screenName:String, completion: (tweets:[Tweet], error:NSError?) -> Void) {
+        let params = ["screen_name": screenName]
+        
+        fetchTweetsFromUrl(false, url: TwitterClient.baseUrl + "/1.1/statuses/user_timeline.json", params: params, completion: completion)
         
         //        var params:[String:AnyObject] = [:]
         //        params["max_id"] = tweet.id
@@ -123,7 +152,7 @@ class TwitterClient: NSObject {
         do {
             try Locksmith.deleteDataForUserAccount("twitter")
         } catch {
-            print(error)
+            NSLog("logout Fail")
         }
         
         client = nil
