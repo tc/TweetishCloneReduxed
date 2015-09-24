@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TimelineViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class TimelineViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, TweetCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     var timelineTweets: [Tweet]?
@@ -28,6 +28,8 @@ class TimelineViewController: UIViewController, UITableViewDataSource, UITableVi
         tableView.estimatedRowHeight = 220
         tableView.rowHeight = UITableViewAutomaticDimension
         
+        tableView.registerNib(UINib(nibName: "TweetCell", bundle: nil), forCellReuseIdentifier: "TweetCell")
+
         // Add refresh control to the tableView
         refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh...", attributes: [NSForegroundColorAttributeName: UIColor.orangeColor()])
@@ -76,11 +78,11 @@ class TimelineViewController: UIViewController, UITableViewDataSource, UITableVi
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        tableView.registerNib(UINib(nibName: "TweetCell", bundle: nil), forCellReuseIdentifier: "TweetCell")
         let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as? TweetCell
 
         if let c = cell {
             c.tweet = timelineTweets![indexPath.row]
+            c.delegate = self
             c.layoutIfNeeded()
             return c
         } else {
@@ -93,9 +95,13 @@ class TimelineViewController: UIViewController, UITableViewDataSource, UITableVi
         NSLog("TimelineViewController#didSelectRowAtIndexPath")
 
         let tweet = timelineTweets![indexPath.row]
-        pushProfileView(tweet)
+        pushTweetView(tweet)
         
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    }
+    
+    func onProfileTapped(tweet: Tweet, sender: AnyObject) {
+        pushProfileView(tweet)
     }
 
     // MARK: - Navigation

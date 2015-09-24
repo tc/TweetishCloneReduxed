@@ -21,7 +21,7 @@ Time spent: --
 
 ##### Home Timeline
 
-- [ ] Tapping on a user image should bring up that user's profile page
+- [X] Tapping on a user image should bring up that user's profile page
 
 #### Optional:
 

@@ -9,8 +9,12 @@
 import UIKit
 import AFNetworking
 
-class TweetCell: UITableViewCell {
+protocol TweetCellDelegate {
+    func onProfileTapped(tweet: Tweet, sender: AnyObject);
+}
 
+class TweetCell: UITableViewCell {
+    
     @IBOutlet weak var tweetContentLabel: UILabel!
     @IBOutlet weak var timestampLabel: UILabel!
     @IBOutlet weak var userHandleLabel: UILabel!
@@ -20,7 +24,6 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var retweetImage: UIImageView!
     @IBOutlet weak var favoriteImage: UIImageView!
     
-    @IBOutlet weak var userAvatarButton: UIButton!
     
     var tweet: Tweet! {
         didSet {
@@ -47,11 +50,11 @@ class TweetCell: UITableViewCell {
         }
     }
     
+    var delegate: TweetCellDelegate?
+    
     func avatarImageTapped(sender: AnyObject) {
-        //notification call
-        //NSNotificationCenter.defaultCenter().postNotificationName("goToUserScreen", object: nil, userInfo:["userId":tweet.userId])
-
         NSLog("Single Tap on button")
+        delegate?.onProfileTapped(tweet, sender: sender)
     }
     
     override func awakeFromNib() {
