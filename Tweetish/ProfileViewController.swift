@@ -78,17 +78,12 @@ class ProfileViewController: UIViewController, UITableViewDataSource, UITableVie
     // Cell gets various attributes set automatically based on table (separators) and data source (accessory views, editing controls)
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        tableView.registerNib(UINib(nibName: "TweetCell", bundle: nil), forCellReuseIdentifier: "TweetCell")
-        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as? TweetCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
         
-        if let c = cell {
-            c.tweet = timelineTweets![indexPath.row]
-            c.layoutIfNeeded()
-            return c
-        } else {
-            // should never get here..
-            return UITableViewCell()
-        }
+        cell.tweet = timelineTweets![indexPath.row]
+        cell.layoutIfNeeded()
+        
+        return cell
     }
     
     // Deselect active row on tap

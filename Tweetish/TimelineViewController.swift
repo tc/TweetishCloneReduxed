@@ -78,17 +78,13 @@ class TimelineViewController: UIViewController, UITableViewDataSource, UITableVi
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as? TweetCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
 
-        if let c = cell {
-            c.tweet = timelineTweets![indexPath.row]
-            c.delegate = self
-            c.layoutIfNeeded()
-            return c
-        } else {
-            // should never get here..
-            return UITableViewCell()
-        }
+        cell.tweet = timelineTweets![indexPath.row]
+        cell.delegate = self
+        cell.layoutIfNeeded()
+        
+        return cell
     }
         
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
